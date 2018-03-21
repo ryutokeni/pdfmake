@@ -211,7 +211,6 @@ DocMeasure.prototype.measureLeaf = function (node) {
 	node._inlines = data.items;
 	node._minWidth = data.minWidth;
 	node._maxWidth = data.maxWidth;
-
 	return node;
 };
 
@@ -230,10 +229,9 @@ DocMeasure.prototype.measureToc = function (node) {
 		var lineMargin = node.toc._items[i].tocMargin || textMargin;
 		body.push([
 			{text: item.text, alignment: 'left', style: lineStyle, margin: lineMargin},
-			{text: '00000', alignment: 'right', _tocItemRef: item, style: numberStyle, margin: [0, lineMargin[1], 0, lineMargin[3]]}
+			{text: '00000', alignment: 'right', _tocItemRef: item, style: numberStyle, margin: [0, lineMargin[1], 0, lineMargin[3]]},
 		]);
 	}
-
 
 	node.toc._table = {
 		table: {
@@ -285,7 +283,7 @@ DocMeasure.prototype.buildUnorderedMarker = function (styleStack, gapSize, type)
 		};
 	}
 
-	function buildSquare(gapSize, color) {
+	function buildSquare(gapSize, color, radius) {
 		// TODO: ascender-based calculations
 		var size = gapSize.fontSize / 3;
 		return {
@@ -294,6 +292,7 @@ DocMeasure.prototype.buildUnorderedMarker = function (styleStack, gapSize, type)
 					y: (gapSize.height / gapSize.lineHeight) + gapSize.descender - (gapSize.fontSize / 3) - (size / 2),
 					h: size,
 					w: size,
+					r: radius,
 					type: 'rect',
 					color: color
 				}]
@@ -317,14 +316,13 @@ DocMeasure.prototype.buildUnorderedMarker = function (styleStack, gapSize, type)
 
 	var marker;
 	var color = styleStack.getProperty('markerColor') || styleStack.getProperty('color') || 'black';
-
 	switch (type) {
 		case 'circle':
 			marker = buildCircle(gapSize, color);
 			break;
 
 		case 'square':
-			marker = buildSquare(gapSize, color);
+			marker = buildSquare(gapSize, color, radius);
 			break;
 
 		case 'none':
@@ -524,7 +522,6 @@ DocMeasure.prototype.measureTable = function (node) {
 
 	var colSpans = [];
 	var col, row, cols, rows;
-
 	for (col = 0, cols = node.table.body[0].length; col < cols; col++) {
 		var c = node.table.widths[col];
 		c._minWidth = 0;
@@ -534,7 +531,6 @@ DocMeasure.prototype.measureTable = function (node) {
 			var rowData = node.table.body[row];
 			var data = rowData[col];
 			if (data === undefined) {
-				console.error('Malformed table row ', rowData, 'in node ', node);
 				throw 'Malformed table row, a cell is undefined.';
 			}
 			if (data === null) { // transform to object
@@ -572,6 +568,7 @@ DocMeasure.prototype.measureTable = function (node) {
 		return function () {
 			if (isObject(data)) {
 				data.fillColor = _this.styleStack.getProperty('fillColor');
+				data.radius = _this.styleStack.getProperty('radius');
 			}
 			return _this.measureNode(data);
 		};
@@ -694,7 +691,8 @@ DocMeasure.prototype.measureTable = function (node) {
 				_span: true,
 				_minWidth: 0,
 				_maxWidth: 0,
-				fillColor: table.body[row][col].fillColor
+				fillColor: table.body[row][col].fillColor,
+				radius: table.body[row][col].radius
 			};
 		}
 	}

@@ -2630,7 +2630,7 @@ Stream.prototype.pipe = function(dest, options) {
 
 /*<replacement>*/
 
-var processNextTick = __webpack_require__(32).nextTick;
+var pna = __webpack_require__(32);
 /*</replacement>*/
 
 /*<replacement>*/
@@ -2684,7 +2684,7 @@ function onend() {
 
   // no more data can be written.
   // But allow more writes to happen in this tick.
-  processNextTick(onEndNT, this);
+  pna.nextTick(onEndNT, this);
 }
 
 function onEndNT(self) {
@@ -2716,7 +2716,7 @@ Duplex.prototype._destroy = function (err, cb) {
   this.push(null);
   this.end();
 
-  processNextTick(cb, err);
+  pna.nextTick(cb, err);
 };
 
 function forEach(xs, f) {
@@ -4573,7 +4573,7 @@ exports.PassThrough = __webpack_require__(145);
 
 /*<replacement>*/
 
-var processNextTick = __webpack_require__(32).nextTick;
+var pna = __webpack_require__(32);
 /*</replacement>*/
 
 module.exports = Writable;
@@ -4600,7 +4600,7 @@ function CorkedRequest(state) {
 /* </replacement> */
 
 /*<replacement>*/
-var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : processNextTick;
+var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : pna.nextTick;
 /*</replacement>*/
 
 /*<replacement>*/
@@ -4834,7 +4834,7 @@ function writeAfterEnd(stream, cb) {
   var er = new Error('write after end');
   // TODO: defer error events consistently everywhere, not just the cb
   stream.emit('error', er);
-  processNextTick(cb, er);
+  pna.nextTick(cb, er);
 }
 
 // Checks that a user-supplied chunk is valid, especially for the particular
@@ -4851,7 +4851,7 @@ function validChunk(stream, state, chunk, cb) {
   }
   if (er) {
     stream.emit('error', er);
-    processNextTick(cb, er);
+    pna.nextTick(cb, er);
     valid = false;
   }
   return valid;
@@ -4971,10 +4971,10 @@ function onwriteError(stream, state, sync, er, cb) {
   if (sync) {
     // defer the callback if we are being called synchronously
     // to avoid piling up things on the stack
-    processNextTick(cb, er);
+    pna.nextTick(cb, er);
     // this can emit finish, and it will always happen
     // after error
-    processNextTick(finishMaybe, stream, state);
+    pna.nextTick(finishMaybe, stream, state);
     stream._writableState.errorEmitted = true;
     stream.emit('error', er);
   } else {
@@ -5149,7 +5149,7 @@ function prefinish(stream, state) {
     if (typeof stream._final === 'function') {
       state.pendingcb++;
       state.finalCalled = true;
-      processNextTick(callFinal, stream, state);
+      pna.nextTick(callFinal, stream, state);
     } else {
       state.prefinished = true;
       stream.emit('prefinish');
@@ -5173,7 +5173,7 @@ function endWritable(stream, state, cb) {
   state.ending = true;
   finishMaybe(stream, state);
   if (cb) {
-    if (state.finished) processNextTick(cb);else stream.once('finish', cb);
+    if (state.finished) pna.nextTick(cb);else stream.once('finish', cb);
   }
   state.ended = true;
   stream.writable = false;
@@ -8124,6 +8124,7 @@ StyleContextStack.prototype.autopush = function (item) {
 		'color',
 		'columnGap',
 		'fillColor',
+		'radius',
 		'decoration',
 		'decorationStyle',
 		'decorationColor',
@@ -8626,7 +8627,7 @@ module.exports = Line;
 
 /*<replacement>*/
 
-var processNextTick = __webpack_require__(32).nextTick;
+var pna = __webpack_require__(32);
 /*</replacement>*/
 
 module.exports = Readable;
@@ -9098,7 +9099,7 @@ function emitReadable(stream) {
   if (!state.emittedReadable) {
     debug('emitReadable', state.flowing);
     state.emittedReadable = true;
-    if (state.sync) processNextTick(emitReadable_, stream);else emitReadable_(stream);
+    if (state.sync) pna.nextTick(emitReadable_, stream);else emitReadable_(stream);
   }
 }
 
@@ -9117,7 +9118,7 @@ function emitReadable_(stream) {
 function maybeReadMore(stream, state) {
   if (!state.readingMore) {
     state.readingMore = true;
-    processNextTick(maybeReadMore_, stream, state);
+    pna.nextTick(maybeReadMore_, stream, state);
   }
 }
 
@@ -9162,7 +9163,7 @@ Readable.prototype.pipe = function (dest, pipeOpts) {
   var doEnd = (!pipeOpts || pipeOpts.end !== false) && dest !== process.stdout && dest !== process.stderr;
 
   var endFn = doEnd ? onend : unpipe;
-  if (state.endEmitted) processNextTick(endFn);else src.once('end', endFn);
+  if (state.endEmitted) pna.nextTick(endFn);else src.once('end', endFn);
 
   dest.on('unpipe', onunpipe);
   function onunpipe(readable, unpipeInfo) {
@@ -9352,7 +9353,7 @@ Readable.prototype.on = function (ev, fn) {
       state.readableListening = state.needReadable = true;
       state.emittedReadable = false;
       if (!state.reading) {
-        processNextTick(nReadingNextTick, this);
+        pna.nextTick(nReadingNextTick, this);
       } else if (state.length) {
         emitReadable(this);
       }
@@ -9383,7 +9384,7 @@ Readable.prototype.resume = function () {
 function resume(stream, state) {
   if (!state.resumeScheduled) {
     state.resumeScheduled = true;
-    processNextTick(resume_, stream, state);
+    pna.nextTick(resume_, stream, state);
   }
 }
 
@@ -9591,7 +9592,7 @@ function endReadable(stream) {
 
   if (!state.endEmitted) {
     state.ended = true;
-    processNextTick(endReadableNT, state, stream);
+    pna.nextTick(endReadableNT, state, stream);
   }
 }
 
@@ -9634,7 +9635,7 @@ module.exports = __webpack_require__(31).EventEmitter;
 
 /*<replacement>*/
 
-var processNextTick = __webpack_require__(32).nextTick;
+var pna = __webpack_require__(32);
 /*</replacement>*/
 
 // undocumented cb() API, needed for core, not for public API
@@ -9648,7 +9649,7 @@ function destroy(err, cb) {
     if (cb) {
       cb(err);
     } else if (err && (!this._writableState || !this._writableState.errorEmitted)) {
-      processNextTick(emitErrorNT, this, err);
+      pna.nextTick(emitErrorNT, this, err);
     }
     return this;
   }
@@ -9667,7 +9668,7 @@ function destroy(err, cb) {
 
   this._destroy(err || null, function (err) {
     if (!cb && err) {
-      processNextTick(emitErrorNT, _this, err);
+      pna.nextTick(emitErrorNT, _this, err);
       if (_this._writableState) {
         _this._writableState.errorEmitted = true;
       }
@@ -12673,7 +12674,7 @@ By Devon Govett
 var PdfPrinter = __webpack_require__(126);
 var isFunction = __webpack_require__(0).isFunction;
 var FileSaver = __webpack_require__(306);
-var saveAs = FileSaver.saveAs;
+var saveAs = FileSaver.default;
 
 var defaultClientFonts = {
 	Roboto: {
@@ -12991,7 +12992,7 @@ function fromByteArray (uint8) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
-  var eLen = nBytes * 8 - mLen - 1
+  var eLen = (nBytes * 8) - mLen - 1
   var eMax = (1 << eLen) - 1
   var eBias = eMax >> 1
   var nBits = -7
@@ -13004,12 +13005,12 @@ exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   e = s & ((1 << (-nBits)) - 1)
   s >>= (-nBits)
   nBits += eLen
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+  for (; nBits > 0; e = (e * 256) + buffer[offset + i], i += d, nBits -= 8) {}
 
   m = e & ((1 << (-nBits)) - 1)
   e >>= (-nBits)
   nBits += mLen
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+  for (; nBits > 0; m = (m * 256) + buffer[offset + i], i += d, nBits -= 8) {}
 
   if (e === 0) {
     e = 1 - eBias
@@ -13024,7 +13025,7 @@ exports.read = function (buffer, offset, isLE, mLen, nBytes) {
 
 exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   var e, m, c
-  var eLen = nBytes * 8 - mLen - 1
+  var eLen = (nBytes * 8) - mLen - 1
   var eMax = (1 << eLen) - 1
   var eBias = eMax >> 1
   var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
@@ -13057,7 +13058,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
       m = 0
       e = eMax
     } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen)
+      m = ((value * c) - 1) * Math.pow(2, mLen)
       e = e + eBias
     } else {
       m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
@@ -13168,8 +13169,9 @@ PdfPrinter.prototype.createPdfKitDocument = function (docDefinition, options) {
 
 	var pageSize = fixPageSize(docDefinition.pageSize, docDefinition.pageOrientation);
 	var compressPdf = isBoolean(docDefinition.compress) ? docDefinition.compress : true;
+	var bufferPages = options.bufferPages || false;
 
-	this.pdfKitDoc = new PdfKit({size: [pageSize.width, pageSize.height], autoFirstPage: false, compress: compressPdf});
+	this.pdfKitDoc = new PdfKit({size: [pageSize.width, pageSize.height], bufferPages: bufferPages, autoFirstPage: false, compress: compressPdf});
 	setMetadata(docDefinition, this.pdfKitDoc);
 
 	this.fontProvider = new FontProvider(this.fontDescriptors, this.pdfKitDoc);
@@ -14259,7 +14261,6 @@ LayoutBuilder.prototype.processList = function (orderedList, node) {
 // tables
 LayoutBuilder.prototype.processTable = function (tableNode) {
 	var processor = new TableProcessor(tableNode);
-
 	processor.beginTable(this.writer);
 
 	var rowHeights = tableNode.table.heights;
@@ -14831,7 +14832,6 @@ DocMeasure.prototype.measureLeaf = function (node) {
 	node._inlines = data.items;
 	node._minWidth = data.minWidth;
 	node._maxWidth = data.maxWidth;
-
 	return node;
 };
 
@@ -14850,10 +14850,9 @@ DocMeasure.prototype.measureToc = function (node) {
 		var lineMargin = node.toc._items[i].tocMargin || textMargin;
 		body.push([
 			{text: item.text, alignment: 'left', style: lineStyle, margin: lineMargin},
-			{text: '00000', alignment: 'right', _tocItemRef: item, style: numberStyle, margin: [0, lineMargin[1], 0, lineMargin[3]]}
+			{text: '00000', alignment: 'right', _tocItemRef: item, style: numberStyle, margin: [0, lineMargin[1], 0, lineMargin[3]]},
 		]);
 	}
-
 
 	node.toc._table = {
 		table: {
@@ -14905,7 +14904,7 @@ DocMeasure.prototype.buildUnorderedMarker = function (styleStack, gapSize, type)
 		};
 	}
 
-	function buildSquare(gapSize, color) {
+	function buildSquare(gapSize, color, radius) {
 		// TODO: ascender-based calculations
 		var size = gapSize.fontSize / 3;
 		return {
@@ -14914,6 +14913,7 @@ DocMeasure.prototype.buildUnorderedMarker = function (styleStack, gapSize, type)
 					y: (gapSize.height / gapSize.lineHeight) + gapSize.descender - (gapSize.fontSize / 3) - (size / 2),
 					h: size,
 					w: size,
+					r: radius,
 					type: 'rect',
 					color: color
 				}]
@@ -14937,14 +14937,13 @@ DocMeasure.prototype.buildUnorderedMarker = function (styleStack, gapSize, type)
 
 	var marker;
 	var color = styleStack.getProperty('markerColor') || styleStack.getProperty('color') || 'black';
-
 	switch (type) {
 		case 'circle':
 			marker = buildCircle(gapSize, color);
 			break;
 
 		case 'square':
-			marker = buildSquare(gapSize, color);
+			marker = buildSquare(gapSize, color, radius);
 			break;
 
 		case 'none':
@@ -15144,7 +15143,6 @@ DocMeasure.prototype.measureTable = function (node) {
 
 	var colSpans = [];
 	var col, row, cols, rows;
-
 	for (col = 0, cols = node.table.body[0].length; col < cols; col++) {
 		var c = node.table.widths[col];
 		c._minWidth = 0;
@@ -15154,7 +15152,6 @@ DocMeasure.prototype.measureTable = function (node) {
 			var rowData = node.table.body[row];
 			var data = rowData[col];
 			if (data === undefined) {
-				console.error('Malformed table row ', rowData, 'in node ', node);
 				throw 'Malformed table row, a cell is undefined.';
 			}
 			if (data === null) { // transform to object
@@ -15192,6 +15189,7 @@ DocMeasure.prototype.measureTable = function (node) {
 		return function () {
 			if (isObject(data)) {
 				data.fillColor = _this.styleStack.getProperty('fillColor');
+				data.radius = _this.styleStack.getProperty('radius');
 			}
 			return _this.measureNode(data);
 		};
@@ -15314,7 +15312,8 @@ DocMeasure.prototype.measureTable = function (node) {
 				_span: true,
 				_minWidth: 0,
 				_maxWidth: 0,
-				fillColor: table.body[row][col].fillColor
+				fillColor: table.body[row][col].fillColor,
+				radius: table.body[row][col].radius
 			};
 		}
 	}
@@ -17230,6 +17229,7 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 
 			if (i < l - 1) {
 				var fillColor = body[rowIndex][colIndex].fillColor;
+				var radius = body[rowIndex][colIndex].radius;
 				if (!fillColor) {
 					fillColor = isFunction(this.layout.fillColor) ? this.layout.fillColor(rowIndex, this.tableNode, colIndex) : this.layout.fillColor;
 				}
@@ -17243,6 +17243,7 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 						y: yf,
 						w: xs[i + 1].x - xf,
 						h: y2 + this.bottomLineWidth - yf,
+						r: radius || 0,
 						lineWidth: 0,
 						color: fillColor
 					}, false, true, writer.context().hasBackground ? 1 : 0);
@@ -50254,60 +50255,73 @@ module.exports = {
 /* 306 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_RESULT__;/* FileSaver.js
- * A saveAs() FileSaver implementation.
- * 1.3.2
- * 2016-06-16 18:25:19
- *
- * By Eli Grey, http://eligrey.com
- * License: MIT
- *   See https://github.com/eligrey/FileSaver.js/blob/master/LICENSE.md
- */
-
-/*global self */
-/*jslint bitwise: true, indent: 4, laxbreak: true, laxcomma: true, smarttabs: true, plusplus: true */
-
-/*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/FileSaver.js */
-
-var saveAs = saveAs || (function(view) {
-	"use strict";
-	// IE <10 is explicitly unsupported
-	if (typeof view === "undefined" || typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
-		return;
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	if (true) {
+		!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	} else if (typeof exports !== "undefined") {
+		factory(exports);
+	} else {
+		var mod = {
+			exports: {}
+		};
+		factory(mod.exports);
+		global.FileSaver = mod.exports;
 	}
-	var
-		  doc = view.document
-		  // only get URL when necessary in case Blob.js hasn't overridden it yet
-		, get_URL = function() {
-			return view.URL || view.webkitURL || view;
+})(this, function (exports) {
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	exports.default = window.saveAs || function (view) {
+		"use strict";
+		// IE <10 is explicitly unsupported
+
+		if (typeof view === "undefined" || typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
+			return;
 		}
-		, save_link = doc ? doc.createElementNS("http://www.w3.org/1999/xhtml", "a") : []
-		, can_use_save_link = "download" in save_link
-		, click = function(node) {
+		var doc = view.document
+		// only get URL when necessary in case Blob.js hasn't overridden it yet
+		,
+		    get_URL = function get_URL() {
+			return view.URL || view.webkitURL || view;
+		},
+		    save_link = doc ? doc.createElementNS("http://www.w3.org/1999/xhtml", "a") : [],
+		    can_use_save_link = "download" in save_link,
+		    click = function click(node) {
 			var event = new MouseEvent("click");
 			node.dispatchEvent(event);
-		}
-		, is_safari = /constructor/i.test(view.HTMLElement) || view.safari
-		, is_chrome_ios =/CriOS\/[\d]+/.test(navigator.userAgent)
-		, throw_outside = function(ex) {
-			(view.setImmediate || view.setTimeout)(function() {
+		},
+		    is_safari = /constructor/i.test(view.HTMLElement) || view.safari,
+		    is_chrome_ios = /CriOS\/[\d]+/.test(navigator.userAgent),
+		    setImmediate = view.setImmediate || view.setTimeout,
+		    throw_outside = function throw_outside(ex) {
+			setImmediate(function () {
 				throw ex;
 			}, 0);
-		}
-		, force_saveable_type = "application/octet-stream"
+		},
+		    force_saveable_type = "application/octet-stream"
 		// the Blob API is fundamentally broken as there is no "downloadfinished" event to subscribe to
-		, arbitrary_revoke_timeout = 1000 * 40 // in ms
-		, revoke = function(file) {
-			var revoker = function() {
-				if (typeof file === "string") { // file is an object URL
+		,
+		    arbitrary_revoke_timeout = 1000 * 40 // in ms
+		,
+		    revoke = function revoke(file) {
+			var revoker = function revoker() {
+				if (typeof file === "string") {
+					// file is an object URL
 					get_URL().revokeObjectURL(file);
-				} else { // file is a File
+				} else {
+					// file is a File
 					file.remove();
 				}
 			};
 			setTimeout(revoker, arbitrary_revoke_timeout);
-		}
-		, dispatch = function(filesaver, event_types, event) {
+		},
+		    dispatch = function dispatch(filesaver, event_types, event) {
 			event_types = [].concat(event_types);
 			var i = event_types.length;
 			while (i--) {
@@ -50320,148 +50334,109 @@ var saveAs = saveAs || (function(view) {
 					}
 				}
 			}
-		}
-		, auto_bom = function(blob) {
+		},
+		    auto_bom = function auto_bom(blob) {
 			// prepend BOM for UTF-8 XML and text/* types (including HTML)
 			// note: your browser will automatically convert UTF-16 U+FEFF to EF BB BF
 			if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
-				return new Blob([String.fromCharCode(0xFEFF), blob], {type: blob.type});
+				return new Blob([String.fromCharCode(0xFEFF), blob], { type: blob.type });
 			}
 			return blob;
-		}
-		, FileSaver = function(blob, name, no_auto_bom) {
+		},
+		    FileSaver = function FileSaver(blob, name, no_auto_bom) {
 			if (!no_auto_bom) {
 				blob = auto_bom(blob);
 			}
 			// First try a.download, then web filesystem, then object URLs
-			var
-				  filesaver = this
-				, type = blob.type
-				, force = type === force_saveable_type
-				, object_url
-				, dispatch_all = function() {
-					dispatch(filesaver, "writestart progress write writeend".split(" "));
+			var filesaver = this,
+			    type = blob.type,
+			    force = type === force_saveable_type,
+			    object_url,
+			    dispatch_all = function dispatch_all() {
+				dispatch(filesaver, "writestart progress write writeend".split(" "));
+			}
+			// on any filesys errors revert to saving with object URLs
+			,
+			    fs_error = function fs_error() {
+				if ((is_chrome_ios || force && is_safari) && view.FileReader) {
+					// Safari doesn't allow downloading of blob urls
+					var reader = new FileReader();
+					reader.onloadend = function () {
+						var url = is_chrome_ios ? reader.result : reader.result.replace(/^data:[^;]*;/, 'data:attachment/file;');
+						var popup = view.open(url, '_blank');
+						if (!popup) view.location.href = url;
+						url = undefined; // release reference before dispatching
+						filesaver.readyState = filesaver.DONE;
+						dispatch_all();
+					};
+					reader.readAsDataURL(blob);
+					filesaver.readyState = filesaver.INIT;
+					return;
 				}
-				// on any filesys errors revert to saving with object URLs
-				, fs_error = function() {
-					if ((is_chrome_ios || (force && is_safari)) && view.FileReader) {
-						// Safari doesn't allow downloading of blob urls
-						var reader = new FileReader();
-						reader.onloadend = function() {
-							var url = is_chrome_ios ? reader.result : reader.result.replace(/^data:[^;]*;/, 'data:attachment/file;');
-							var popup = view.open(url, '_blank');
-							if(!popup) view.location.href = url;
-							url=undefined; // release reference before dispatching
-							filesaver.readyState = filesaver.DONE;
-							dispatch_all();
-						};
-						reader.readAsDataURL(blob);
-						filesaver.readyState = filesaver.INIT;
-						return;
-					}
-					// don't create more object URLs than needed
-					if (!object_url) {
-						object_url = get_URL().createObjectURL(blob);
-					}
-					if (force) {
+				// don't create more object URLs than needed
+				if (!object_url) {
+					object_url = get_URL().createObjectURL(blob);
+				}
+				if (force) {
+					view.location.href = object_url;
+				} else {
+					var opened = view.open(object_url, "_blank");
+					if (!opened) {
+						// Apple does not allow window.open, see https://developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
 						view.location.href = object_url;
-					} else {
-						var opened = view.open(object_url, "_blank");
-						if (!opened) {
-							// Apple does not allow window.open, see https://developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
-							view.location.href = object_url;
-						}
 					}
-					filesaver.readyState = filesaver.DONE;
-					dispatch_all();
-					revoke(object_url);
 				}
-			;
+				filesaver.readyState = filesaver.DONE;
+				dispatch_all();
+				revoke(object_url);
+			};
 			filesaver.readyState = filesaver.INIT;
 
 			if (can_use_save_link) {
 				object_url = get_URL().createObjectURL(blob);
-				setTimeout(function() {
+				setImmediate(function () {
 					save_link.href = object_url;
 					save_link.download = name;
 					click(save_link);
 					dispatch_all();
 					revoke(object_url);
 					filesaver.readyState = filesaver.DONE;
-				});
+				}, 0);
 				return;
 			}
 
 			fs_error();
-		}
-		, FS_proto = FileSaver.prototype
-		, saveAs = function(blob, name, no_auto_bom) {
+		},
+		    FS_proto = FileSaver.prototype,
+		    saveAs = function saveAs(blob, name, no_auto_bom) {
 			return new FileSaver(blob, name || blob.name || "download", no_auto_bom);
-		}
-	;
-	// IE 10+ (native saveAs)
-	if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
-		return function(blob, name, no_auto_bom) {
-			name = name || blob.name || "download";
-
-			if (!no_auto_bom) {
-				blob = auto_bom(blob);
-			}
-			return navigator.msSaveOrOpenBlob(blob, name);
 		};
-	}
 
-	FS_proto.abort = function(){};
-	FS_proto.readyState = FS_proto.INIT = 0;
-	FS_proto.WRITING = 1;
-	FS_proto.DONE = 2;
+		// IE 10+ (native saveAs)
+		if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
+			return function (blob, name, no_auto_bom) {
+				name = name || blob.name || "download";
 
-	FS_proto.error =
-	FS_proto.onwritestart =
-	FS_proto.onprogress =
-	FS_proto.onwrite =
-	FS_proto.onabort =
-	FS_proto.onerror =
-	FS_proto.onwriteend =
-		null;
+				if (!no_auto_bom) {
+					blob = auto_bom(blob);
+				}
+				return navigator.msSaveOrOpenBlob(blob, name);
+			};
+		}
 
-	return saveAs;
-}(
-	   typeof self !== "undefined" && self
-	|| typeof window !== "undefined" && window
-	|| this.content
-));
-// `self` is undefined in Firefox for Android content script context
-// while `this` is nsIContentFrameMessageManager
-// with an attribute `content` that corresponds to the window
+		save_link.target = "_blank";
 
-if (typeof module !== "undefined" && module.exports) {
-  module.exports.saveAs = saveAs;
-} else if (("function" !== "undefined" && __webpack_require__(307) !== null) && (__webpack_require__(308) !== null)) {
-  !(__WEBPACK_AMD_DEFINE_RESULT__ = (function() {
-    return saveAs;
-  }).call(exports, __webpack_require__, exports, module),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-}
+		FS_proto.abort = function () {};
+		FS_proto.readyState = FS_proto.INIT = 0;
+		FS_proto.WRITING = 1;
+		FS_proto.DONE = 2;
 
+		FS_proto.error = FS_proto.onwritestart = FS_proto.onprogress = FS_proto.onwrite = FS_proto.onabort = FS_proto.onerror = FS_proto.onwriteend = null;
 
-/***/ }),
-/* 307 */
-/***/ (function(module, exports) {
+		return saveAs;
+	}(typeof self !== "undefined" && self || typeof window !== "undefined" && window || undefined);
+});
 
-module.exports = function() {
-	throw new Error("define cannot be used indirect");
-};
-
-
-/***/ }),
-/* 308 */
-/***/ (function(module, exports) {
-
-/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
-module.exports = __webpack_amd_options__;
-
-/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ })
 /******/ ]);

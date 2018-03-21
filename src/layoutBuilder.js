@@ -577,7 +577,6 @@ LayoutBuilder.prototype.processList = function (orderedList, node) {
 // tables
 LayoutBuilder.prototype.processTable = function (tableNode) {
 	var processor = new TableProcessor(tableNode);
-
 	processor.beginTable(this.writer);
 
 	var rowHeights = tableNode.table.heights;

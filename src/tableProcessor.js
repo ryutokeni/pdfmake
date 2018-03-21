@@ -308,6 +308,7 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 
 			if (i < l - 1) {
 				var fillColor = body[rowIndex][colIndex].fillColor;
+				var radius = body[rowIndex][colIndex].radius;
 				if (!fillColor) {
 					fillColor = isFunction(this.layout.fillColor) ? this.layout.fillColor(rowIndex, this.tableNode, colIndex) : this.layout.fillColor;
 				}
@@ -321,6 +322,7 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 						y: yf,
 						w: xs[i + 1].x - xf,
 						h: y2 + this.bottomLineWidth - yf,
+						r: radius || 0,
 						lineWidth: 0,
 						color: fillColor
 					}, false, true, writer.context().hasBackground ? 1 : 0);
