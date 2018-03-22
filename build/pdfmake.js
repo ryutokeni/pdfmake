@@ -15230,6 +15230,9 @@ DocMeasure.prototype.measureTable = function (node) {
 			fillColor: function (i, node) {
 				return null;
 			},
+			radius: function (i, node) {
+				return 0;
+			},
 			defaultBorder: true
 		};
 
@@ -17072,7 +17075,7 @@ TableProcessor.prototype.drawHorizontalLine = function (lineIndex, writer, overr
 		var offset = lineWidth / 2;
 		var currentLine = null;
 		var body = this.tableNode.table.body;
-
+		var tableRadius = body.radius || 20;
 		for (var i = 0, l = this.rowSpanData.length; i < l; i++) {
 			var data = this.rowSpanData[i];
 			var shouldDrawLine = !data.rowSpan;
@@ -17112,7 +17115,7 @@ TableProcessor.prototype.drawHorizontalLine = function (lineIndex, writer, overr
 					writer.addVector({
 						type: 'line',
 						x1: currentLine.left,
-						x2: currentLine.left + currentLine.width,
+						x2: currentLine.left + currentLine.width - tableRadius,
 						y1: y,
 						y2: y,
 						lineWidth: lineWidth,
@@ -17132,12 +17135,15 @@ TableProcessor.prototype.drawVerticalLine = function (x, y0, y1, vLineIndex, wri
 	if (width === 0) {
 		return;
 	}
+	var body = this.tableNode.table.body;
+	var tableRadius = body.radius || 20;
+	console.log(tableRadius);
 	writer.addVector({
 		type: 'line',
 		x1: x + width / 2,
 		x2: x + width / 2,
 		y1: y0,
-		y2: y1,
+		y2: y1 - tableRadius,
 		lineWidth: width,
 		lineColor: isFunction(this.layout.vLineColor) ? this.layout.vLineColor(vLineIndex, this.tableNode) : this.layout.vLineColor
 	}, false, true);
@@ -17166,7 +17172,6 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 
 	var hasBreaks = pageBreaks && pageBreaks.length > 0;
 	var body = this.tableNode.table.body;
-
 	ys.push({
 		y0: this.rowTopY,
 		page: hasBreaks ? pageBreaks[0].prevPage : endingPage

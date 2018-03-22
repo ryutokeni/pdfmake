@@ -609,6 +609,9 @@ DocMeasure.prototype.measureTable = function (node) {
 			fillColor: function (i, node) {
 				return null;
 			},
+			radius: function (i, node) {
+				return 0;
+			},
 			defaultBorder: true
 		};
 

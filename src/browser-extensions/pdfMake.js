@@ -3,7 +3,7 @@
 var PdfPrinter = require('../printer');
 var isFunction = require('../helpers').isFunction;
 var FileSaver = require('file-saver');
-var saveAs = FileSaver.saveAs;
+var saveAs = FileSaver.default;
 
 var defaultClientFonts = {
 	Roboto: {
