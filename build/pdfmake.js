@@ -17166,7 +17166,7 @@ TableProcessor.prototype.drawVerticalLine = function (x, y0, y1, vLineIndex, hLi
 		if (vLineIndex === 0) {
 			d = 'M' + (x0 + tableRadius + context.x) + ',' + (y1 - width/2) + ' Q' + (x0 + context.x) + ',' + (y1) + ' ' + (x0 + context.x) + ',' + (y1 - tableRadius);
 		} else {
-			d = 'M' + (x0 - tableRadius + context.x - width/2) + ',' + (y1 + tableRadius) + ' Q' + (x0 + context.x) + ',' + (y1) + ' ' + (x0 + context.x) + ',' + (y1 - tableRadius);
+			d = 'M' + (x0 - tableRadius + context.x - width/2) + ',' + (y1 - width/2) + ' Q' + (x0 + context.x) + ',' + (y1) + ' ' + (x0 + context.x) + ',' + (y1 - tableRadius);
 		}
 		writer.addVector({
 			type: 'path',
