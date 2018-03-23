@@ -599,7 +599,7 @@ LayoutBuilder.prototype.processTable = function (tableNode) {
 		var result = this.processRow(tableNode.table.body[i], tableNode.table.widths, tableNode._offsets.offsets, tableNode.table.body, i, height);
 		addAll(tableNode.positions, result.positions);
 
-		processor.endRow(i, this.writer, result.pageBreaks);
+		processor.endRow(i, this.writer, result.pageBreaks, i === (l-1) ? true : false);
 	}
 
 	processor.endTable(this.writer);

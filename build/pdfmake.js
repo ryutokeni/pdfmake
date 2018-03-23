@@ -14283,7 +14283,7 @@ LayoutBuilder.prototype.processTable = function (tableNode) {
 		var result = this.processRow(tableNode.table.body[i], tableNode.table.widths, tableNode._offsets.offsets, tableNode.table.body, i, height);
 		addAll(tableNode.positions, result.positions);
 
-		processor.endRow(i, this.writer, result.pageBreaks);
+		processor.endRow(i, this.writer, result.pageBreaks, i === (l-1) ? true : false);
 	}
 
 	processor.endTable(this.writer);
@@ -16841,27 +16841,27 @@ ElementWriter.prototype.addFragment = function (block, useBlockXOffset, useBlock
 
 	block.items.forEach(function (item) {
 		switch (item.type) {
-			case 'line':
-				var l = cloneLine(item.item);
-
-				l.x = (l.x || 0) + (useBlockXOffset ? (block.xOffset || 0) : ctx.x);
-				l.y = (l.y || 0) + (useBlockYOffset ? (block.yOffset || 0) : ctx.y);
-
-				page.items.push({
-					type: 'line',
-					item: l
-				});
-				break;
-
-			case 'vector':
-				var v = pack(item.item);
-
-				offsetVector(v, useBlockXOffset ? (block.xOffset || 0) : ctx.x, useBlockYOffset ? (block.yOffset || 0) : ctx.y);
-				page.items.push({
-					type: 'vector',
-					item: v
-				});
-				break;
+			// case 'line':
+			// 	var l = cloneLine(item.item);
+			//
+			// 	l.x = (l.x || 0) + (useBlockXOffset ? (block.xOffset || 0) : ctx.x);
+			// 	l.y = (l.y || 0) + (useBlockYOffset ? (block.yOffset || 0) : ctx.y);
+			//
+			// 	page.items.push({
+			// 		type: 'line',
+			// 		item: l
+			// 	});
+			// 	break;
+			//
+			// case 'vector':
+			// 	var v = pack(item.item);
+			//
+			// 	offsetVector(v, useBlockXOffset ? (block.xOffset || 0) : ctx.x, useBlockYOffset ? (block.yOffset || 0) : ctx.y);
+			// 	page.items.push({
+			// 		type: 'vector',
+			// 		item: v
+			// 	});
+			// 	break;
 
 			case 'image':
 				var img = pack(item.item);
@@ -16958,7 +16958,7 @@ TableProcessor.prototype.beginTable = function (writer) {
 	// update the border properties of all cells before drawing any lines
 	prepareCellBorders(this.tableNode.table.body);
 
-	this.drawHorizontalLine(0, writer);
+	this.drawHorizontalLine(0, writer, null, true);
 
 	function getTableInnerContentWidth() {
 		var width = 0;
@@ -17069,13 +17069,13 @@ TableProcessor.prototype.beginRow = function (rowIndex, writer) {
 	writer.context().moveDown(this.rowPaddingTop);
 };
 
-TableProcessor.prototype.drawHorizontalLine = function (lineIndex, writer, overrideY) {
+TableProcessor.prototype.drawHorizontalLine = function (lineIndex, writer, overrideY, shouldCheckRadius) {
 	var lineWidth = this.layout.hLineWidth(lineIndex, this.tableNode);
 	if (lineWidth) {
 		var offset = lineWidth / 2;
 		var currentLine = null;
 		var body = this.tableNode.table.body;
-		var tableRadius = body.radius || 20;
+		var tableRadius = shouldCheckRadius ? ((this.tableNode.radius || 0)/2) : 0;
 		for (var i = 0, l = this.rowSpanData.length; i < l; i++) {
 			var data = this.rowSpanData[i];
 			var shouldDrawLine = !data.rowSpan;
@@ -17114,7 +17114,7 @@ TableProcessor.prototype.drawHorizontalLine = function (lineIndex, writer, overr
 				if (currentLine && currentLine.width) {
 					writer.addVector({
 						type: 'line',
-						x1: currentLine.left,
+						x1: currentLine.left + tableRadius,
 						x2: currentLine.left + currentLine.width - tableRadius,
 						y1: y,
 						y2: y,
@@ -17130,23 +17130,51 @@ TableProcessor.prototype.drawHorizontalLine = function (lineIndex, writer, overr
 	}
 };
 
-TableProcessor.prototype.drawVerticalLine = function (x, y0, y1, vLineIndex, writer) {
+TableProcessor.prototype.drawVerticalLine = function (x, y0, y1, vLineIndex, hLineRadius, writer, shouldCheckRadius) {
 	var width = this.layout.vLineWidth(vLineIndex, this.tableNode);
 	if (width === 0) {
 		return;
 	}
 	var body = this.tableNode.table.body;
-	var tableRadius = body.radius || 20;
-	console.log(tableRadius);
+	var tableRadius = shouldCheckRadius ? ((this.tableNode.radius || 0)/2) : 0;
+	var x0 = x + width / 2;
 	writer.addVector({
 		type: 'line',
-		x1: x + width / 2,
-		x2: x + width / 2,
-		y1: y0,
-		y2: y1 - tableRadius,
+		x1: x0,
+		x2: x0,
+		y1: y0 + (hLineRadius === 0 ? tableRadius : 0),
+		y2: y1 - (hLineRadius === -1 ? tableRadius : 0),
 		lineWidth: width,
 		lineColor: isFunction(this.layout.vLineColor) ? this.layout.vLineColor(vLineIndex, this.tableNode) : this.layout.vLineColor
 	}, false, true);
+	var context = writer.context();
+	var d = ''
+	if (hLineRadius === 0) {
+		if (vLineIndex === 0) {
+			d = 'M' + (x0 + context.x) + ',' + (y0 + tableRadius) + ' Q' + (x0 + context.x) + ',' + (y0) + ' ' + (x0 + context.x + tableRadius) + ',' + (y0 + width/2);
+		} else {
+			d = 'M' + (x0 - tableRadius + context.x - width/2) + ',' + (y0 + width/2) + ' Q' + (x0 + context.x) + ',' + (y0) + ' ' + (x0 + context.x) + ',' + (y0 + tableRadius);
+		}
+		writer.addVector({
+			type: 'path',
+			d: d,
+			lineWidth: width,
+			lineColor: isFunction(this.layout.vLineColor) ? this.layout.vLineColor(vLineIndex, this.tableNode) : this.layout.vLineColor
+		}, false, true);
+	} else if (hLineRadius === -1) {
+
+		if (vLineIndex === 0) {
+			d = 'M' + (x0 + tableRadius + context.x) + ',' + (y1 - width/2) + ' Q' + (x0 + context.x) + ',' + (y1) + ' ' + (x0 + context.x) + ',' + (y1 - tableRadius);
+		} else {
+			d = 'M' + (x0 - tableRadius + context.x - width/2) + ',' + (y1 + tableRadius) + ' Q' + (x0 + context.x) + ',' + (y1) + ' ' + (x0 + context.x) + ',' + (y1 - tableRadius);
+		}
+		writer.addVector({
+			type: 'path',
+			d: d,
+			lineWidth: width,
+			lineColor: isFunction(this.layout.vLineColor) ? this.layout.vLineColor(vLineIndex, this.tableNode) : this.layout.vLineColor
+		}, false, true);
+	}
 };
 
 TableProcessor.prototype.endTable = function (writer) {
@@ -17156,7 +17184,7 @@ TableProcessor.prototype.endTable = function (writer) {
 	}
 };
 
-TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
+TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks, lastRow) {
 	var l, i;
 	var self = this;
 	writer.tracker.stopTracking('pageChanged', this.rowCallback);
@@ -17228,8 +17256,10 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 				rightBorder = cell.border ? cell.border[2] : this.layout.defaultBorder;
 			}
 
+			var hLineRadius = lastRow ? -1 : ((rowBreakWithoutHeader && this.layout.hLineWhenBroken !== false) ? 0 : rowIndex);
+
 			if (leftBorder || rightBorder) {
-				this.drawVerticalLine(xs[i].x, y1 - hzLineOffset, y2 + this.bottomLineWidth, xs[i].index, writer);
+				this.drawVerticalLine(xs[i].x, y1 - hzLineOffset, y2 + this.bottomLineWidth, xs[i].index, hLineRadius, writer, (i === 0 || i === (l-1)) ? true : false );
 			}
 
 			if (i < l - 1) {
@@ -17257,10 +17287,10 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 		}
 
 		if (willBreak && this.layout.hLineWhenBroken !== false) {
-			this.drawHorizontalLine(rowIndex + 1, writer, y2);
+			this.drawHorizontalLine(rowIndex + 1, writer, y2, true);
 		}
 		if (rowBreakWithoutHeader && this.layout.hLineWhenBroken !== false) {
-			this.drawHorizontalLine(rowIndex, writer, y1);
+			this.drawHorizontalLine(rowIndex, writer, y1, true);
 		}
 	}
 
@@ -17285,7 +17315,7 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 		}
 	}
 
-	this.drawHorizontalLine(rowIndex + 1, writer);
+	this.drawHorizontalLine(rowIndex + 1, writer, null, lastRow);
 
 	if (this.headerRows && rowIndex === this.headerRows - 1) {
 		this.headerRepeatable = writer.currentBlockToRepeatable();
@@ -17295,7 +17325,7 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 		writer.tracker.auto('pageChanged',
 			function () {
 				if (!self.headerRows && self.layout.hLineWhenBroken !== false) {
-					self.drawHorizontalLine(rowIndex, writer);
+					self.drawHorizontalLine(rowIndex, writer, null, true);
 				}
 			},
 			function () {
