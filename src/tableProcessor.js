@@ -151,7 +151,7 @@ TableProcessor.prototype.drawHorizontalLine = function (lineIndex, writer, overr
 		var offset = lineWidth / 2;
 		var currentLine = null;
 		var body = this.tableNode.table.body;
-		var tableRadius = shouldCheckRadius ? ((this.tableNode.radius || 0)/2) : 0;
+		var tableRadius = shouldCheckRadius ? (this.tableNode.radius || 0) : 0;
 		for (var i = 0, l = this.rowSpanData.length; i < l; i++) {
 			var data = this.rowSpanData[i];
 			var shouldDrawLine = !data.rowSpan;
@@ -212,7 +212,7 @@ TableProcessor.prototype.drawVerticalLine = function (x, y0, y1, vLineIndex, hLi
 		return;
 	}
 	var body = this.tableNode.table.body;
-	var tableRadius = shouldCheckRadius ? ((this.tableNode.radius || 0)/2) : 0;
+	var tableRadius = shouldCheckRadius ? (this.tableNode.radius || 0) : 0;
 	var x0 = x + width / 2;
 	writer.addVector({
 		type: 'line',
