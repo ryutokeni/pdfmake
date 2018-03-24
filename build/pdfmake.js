@@ -16841,27 +16841,27 @@ ElementWriter.prototype.addFragment = function (block, useBlockXOffset, useBlock
 
 	block.items.forEach(function (item) {
 		switch (item.type) {
-			// case 'line':
-			// 	var l = cloneLine(item.item);
-			//
-			// 	l.x = (l.x || 0) + (useBlockXOffset ? (block.xOffset || 0) : ctx.x);
-			// 	l.y = (l.y || 0) + (useBlockYOffset ? (block.yOffset || 0) : ctx.y);
-			//
-			// 	page.items.push({
-			// 		type: 'line',
-			// 		item: l
-			// 	});
-			// 	break;
-			//
-			// case 'vector':
-			// 	var v = pack(item.item);
-			//
-			// 	offsetVector(v, useBlockXOffset ? (block.xOffset || 0) : ctx.x, useBlockYOffset ? (block.yOffset || 0) : ctx.y);
-			// 	page.items.push({
-			// 		type: 'vector',
-			// 		item: v
-			// 	});
-			// 	break;
+			case 'line':
+				var l = cloneLine(item.item);
+
+				l.x = (l.x || 0) + (useBlockXOffset ? (block.xOffset || 0) : ctx.x);
+				l.y = (l.y || 0) + (useBlockYOffset ? (block.yOffset || 0) : ctx.y);
+
+				page.items.push({
+					type: 'line',
+					item: l
+				});
+				break;
+
+			case 'vector':
+				var v = pack(item.item);
+
+				offsetVector(v, useBlockXOffset ? (block.xOffset || 0) : ctx.x, useBlockYOffset ? (block.yOffset || 0) : ctx.y);
+				page.items.push({
+					type: 'vector',
+					item: v
+				});
+				break;
 
 			case 'image':
 				var img = pack(item.item);
