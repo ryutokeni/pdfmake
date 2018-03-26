@@ -568,7 +568,7 @@ DocMeasure.prototype.measureTable = function (node) {
 		return function () {
 			if (isObject(data)) {
 				data.fillColor = _this.styleStack.getProperty('fillColor');
-				data.radius = _this.styleStack.getProperty('radius');
+				// data.radius = _this.styleStack.getProperty('radius');
 			}
 			return _this.measureNode(data);
 		};
@@ -608,9 +608,6 @@ DocMeasure.prototype.measureTable = function (node) {
 			},
 			fillColor: function (i, node) {
 				return null;
-			},
-			radius: function (i, node) {
-				return 0;
 			},
 			defaultBorder: true
 		};

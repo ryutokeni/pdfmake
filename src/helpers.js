@@ -63,6 +63,12 @@ function offsetVector(vector, x, y) {
 			vector.y1 += y;
 			vector.y2 += y;
 			break;
+		case 'polygon':
+			vector.points.forEach(function(point) {
+				point[0] += x;
+				point[1] += y;
+			})
+			break;
 		case 'polyline':
 			for (var i = 0, l = vector.points.length; i < l; i++) {
 				vector.points[i].x += x;

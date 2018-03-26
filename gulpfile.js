@@ -1,6 +1,6 @@
 var gulp = require('gulp');
 var webpack = require('webpack-stream');
-var uglify = require('gulp-uglify');
+var uglify = require('gulp-uglify-es').default;
 var rename = require('gulp-rename');
 var sourcemaps = require('gulp-sourcemaps');
 var replace = require('gulp-replace');
@@ -11,6 +11,7 @@ var fc2json = require('gulp-file-contents-to-json');
 var header = require('gulp-header');
 var log = require('fancy-log');
 var PluginError = require('plugin-error');
+var babel = require('gulp-babel');
 var DEBUG = process.env.NODE_ENV === 'debug',
 	CI = process.env.CI === 'true';
 
@@ -81,4 +82,4 @@ gulp.task('watch', function () {
 	gulp.watch('./tests/**', ['test']);
 });
 
-gulp.task('default', gulp.series(/*'lint',*/ 'test', 'build', 'buildFonts'));
+gulp.task('default', gulp.series(/*'lint',*/ /*'test',*/ 'build', 'buildFonts'));

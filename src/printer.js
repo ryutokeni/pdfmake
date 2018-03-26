@@ -453,6 +453,9 @@ function renderVector(vector, pdfKitDoc) {
 		case 'ellipse':
 			pdfKitDoc.ellipse(vector.x, vector.y, vector.r1, vector.r2);
 			break;
+		case 'polygon':
+			pdfKitDoc.polygon(...vector.points);
+			break;
 		case 'rect':
 			if (vector.r) {
 				pdfKitDoc.roundedRect(vector.x, vector.y, vector.w, vector.h, vector.r);

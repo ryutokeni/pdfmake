@@ -144,6 +144,12 @@ function offsetVector(vector, x, y) {
 			vector.y1 += y;
 			vector.y2 += y;
 			break;
+		case 'polygon':
+			vector.points.forEach(function(point) {
+				point[0] += x;
+				point[1] += y;
+			})
+			break;
 		case 'polyline':
 			for (var i = 0, l = vector.points.length; i < l; i++) {
 				vector.points[i].x += x;
@@ -13536,6 +13542,9 @@ function renderVector(vector, pdfKitDoc) {
 		case 'ellipse':
 			pdfKitDoc.ellipse(vector.x, vector.y, vector.r1, vector.r2);
 			break;
+		case 'polygon':
+			pdfKitDoc.polygon(...vector.points);
+			break;
 		case 'rect':
 			if (vector.r) {
 				pdfKitDoc.roundedRect(vector.x, vector.y, vector.w, vector.h, vector.r);
@@ -15189,7 +15198,7 @@ DocMeasure.prototype.measureTable = function (node) {
 		return function () {
 			if (isObject(data)) {
 				data.fillColor = _this.styleStack.getProperty('fillColor');
-				data.radius = _this.styleStack.getProperty('radius');
+				// data.radius = _this.styleStack.getProperty('radius');
 			}
 			return _this.measureNode(data);
 		};
@@ -15229,9 +15238,6 @@ DocMeasure.prototype.measureTable = function (node) {
 			},
 			fillColor: function (i, node) {
 				return null;
-			},
-			radius: function (i, node) {
-				return 0;
 			},
 			defaultBorder: true
 		};
@@ -17265,6 +17271,7 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks, lastRo
 			if (i < l - 1) {
 				var fillColor = body[rowIndex][colIndex].fillColor;
 				var radius = body[rowIndex][colIndex].radius;
+
 				if (!fillColor) {
 					fillColor = isFunction(this.layout.fillColor) ? this.layout.fillColor(rowIndex, this.tableNode, colIndex) : this.layout.fillColor;
 				}
@@ -17272,12 +17279,40 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks, lastRo
 					var wBorder = (leftBorder || rightBorder) ? this.layout.vLineWidth(colIndex, this.tableNode) : 0;
 					var xf = xs[i].x + wBorder;
 					var yf = this.dontBreakRows ? y1 : y1 - hzLineOffset;
+					var w = xs[i + 1].x - xf;
+					var h = y2 + this.bottomLineWidth - yf;
+					var points = [];
+					if (rowIndex === 0 && colIndex === 0 && this.tableNode.radius) {
+						radius = this.tableNode.radius;
+						points = [[xf, yf + radius], [xf + radius, yf], [xf + w, yf], [xf + w, yf + h], [xf, yf + h]];
+					}
+					if (rowIndex === 0 && colIndex === xs[l-2].index && this.tableNode.radius) {
+						radius = this.tableNode.radius;
+						console.log(radius);
+						points = [[xf, yf], [xf + w - radius, yf], [xf + w, yf + radius], [xf + w, yf + h], [xf, yf + h]];
+					}
+					if (lastRow && colIndex === 0 && this.tableNode.radius) {
+						radius = this.tableNode.radius;
+						points = [[xf, yf], [xf + w, yf], [xf + w, yf + h], [xf + radius, yf], [xf, yf + h - radius]];
+					}
+					if (lastRow && colIndex === xs[l-2].index && this.tableNode.radius) {
+						radius = this.tableNode.radius;
+						points = [[xf, yf], [xf + w, yf], [xf + w, yf + h - radius], [xf + w - radius, yf + h], [xf, yf + h]];
+					}
+					if (radius && points.length > 0) {
+						writer.addVector({
+							type: 'polygon',
+							points: points,
+							lineWidth: 0,
+							color: fillColor
+						}, false, true, writer.context().hasBackground ? 1 : 0);
+					}
 					writer.addVector({
 						type: 'rect',
 						x: xf,
 						y: yf,
-						w: xs[i + 1].x - xf,
-						h: y2 + this.bottomLineWidth - yf,
+						w: w,
+						h: h,
 						r: radius || 0,
 						lineWidth: 0,
 						color: fillColor
