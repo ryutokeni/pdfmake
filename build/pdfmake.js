@@ -12677,11 +12677,11 @@ var FileSaver = __webpack_require__(306);
 var saveAs = FileSaver.default;
 
 var defaultClientFonts = {
-	Roboto: {
-		normal: 'Roboto-Regular.ttf',
-		bold: 'Roboto-Medium.ttf',
-		italics: 'Roboto-Italic.ttf',
-		bolditalics: 'Roboto-MediumItalic.ttf'
+	SourceSansPro: {
+		normal: 'SourceSansPro-Regular.ttf',
+		bold: 'SourceSansPro-Bold.ttf',
+		italics: 'SourceSansPro-Italic.ttf',
+		bolditalics: 'SourceSansPro-BoldItalic.ttf'
 	}
 };
 
