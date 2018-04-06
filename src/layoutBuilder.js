@@ -163,7 +163,7 @@ LayoutBuilder.prototype.tryLayoutDocument = function (docStructure, fontProvider
 		this.addWatermark(watermark, fontProvider, defaultStyle);
 	}
 
-	return {pages: this.writer.context().pages, linearNodeList: this.linearNodeList};
+	return { pages: this.writer.context().pages, linearNodeList: this.linearNodeList };
 };
 
 
@@ -190,6 +190,24 @@ LayoutBuilder.prototype.addStaticRepeatable = function (headerOrFooter, sizeFunc
 	}, sizeFunction);
 };
 
+// LayoutBuilder.prototype.addDynamicRepeatable = function (nodeGetter, sizeFunction) {
+// 	var pages = this.writer.context().pages;
+
+// 	for (var pageIndex = 0, l = pages.length; pageIndex < l; pageIndex++) {
+// 		this.writer.context().page = pageIndex;
+
+// 		var node = nodeGetter(pageIndex + 1, l, this.writer.context().pages[pageIndex].pageSize);
+
+// 		if (node) {
+// 			var sizes = sizeFunction(this.writer.context().getCurrentPage().pageSize, this.pageMargins);
+// 			this.writer.beginUnbreakableBlock(sizes.width, sizes.height);
+// 			node = this.docPreprocessor.preprocessDocument(node);
+// 			this.processNode(this.docMeasure.measureDocument(node));
+// 			this.writer.commitUnbreakableBlock(sizes.x, sizes.y);
+// 		}
+// 	}
+// };
+
 LayoutBuilder.prototype.addDynamicRepeatable = function (nodeGetter, sizeFunction) {
 	var pages = this.writer.context().pages;
 
@@ -199,7 +217,7 @@ LayoutBuilder.prototype.addDynamicRepeatable = function (nodeGetter, sizeFunctio
 		var node = nodeGetter(pageIndex + 1, l, this.writer.context().pages[pageIndex].pageSize);
 
 		if (node) {
-			var sizes = sizeFunction(this.writer.context().getCurrentPage().pageSize, this.pageMargins);
+			var sizes = sizeFunction(this.writer.context().getCurrentPage().pageSize, this.writer.context().getCurrentPage().pageMargins);
 			this.writer.beginUnbreakableBlock(sizes.width, sizes.height);
 			node = this.docPreprocessor.preprocessDocument(node);
 			this.processNode(this.docMeasure.measureDocument(node));
@@ -242,7 +260,7 @@ LayoutBuilder.prototype.addHeadersAndFooters = function (header, footer) {
 
 LayoutBuilder.prototype.addWatermark = function (watermark, fontProvider, defaultStyle) {
 	if (isString(watermark)) {
-		watermark = {'text': watermark};
+		watermark = { 'text': watermark };
 	}
 
 	if (!watermark.text) { // empty watermark text
@@ -273,7 +291,7 @@ LayoutBuilder.prototype.addWatermark = function (watermark, fontProvider, defaul
 		var height = pageSize.height;
 		var targetWidth = Math.sqrt(width * width + height * height) * 0.8; /* page diagonal * sample factor */
 		var textTools = new TextTools(fontProvider);
-		var styleContextStack = new StyleContextStack(null, {font: watermark.font, bold: watermark.bold, italics: watermark.italics});
+		var styleContextStack = new StyleContextStack(null, { font: watermark.font, bold: watermark.bold, italics: watermark.italics });
 		var size;
 
 		/**
@@ -301,7 +319,7 @@ LayoutBuilder.prototype.addWatermark = function (watermark, fontProvider, defaul
 		/*
 		 End binary search
 		 */
-		return {size: size, fontSize: c};
+		return { size: size, fontSize: c };
 	}
 };
 
@@ -491,7 +509,7 @@ LayoutBuilder.prototype.processRow = function (columns, widths, gaps, tableBody,
 		self.writer.context().completeColumnGroup(height);
 	});
 
-	return {pageBreaks: pageBreaks, positions: positions};
+	return { pageBreaks: pageBreaks, positions: positions };
 
 	function storePageBreakData(data) {
 		var pageDesc;
@@ -599,7 +617,7 @@ LayoutBuilder.prototype.processTable = function (tableNode) {
 		var result = this.processRow(tableNode.table.body[i], tableNode.table.widths, tableNode._offsets.offsets, tableNode.table.body, i, height);
 		addAll(tableNode.positions, result.positions);
 
-		processor.endRow(i, this.writer, result.pageBreaks, i === (l-1) ? true : false);
+		processor.endRow(i, this.writer, result.pageBreaks, i === (l - 1) ? true : false);
 	}
 
 	processor.endTable(this.writer);
